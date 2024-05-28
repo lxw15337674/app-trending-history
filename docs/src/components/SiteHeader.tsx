@@ -43,7 +43,7 @@ export function SiteHeaderContent() {
         <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-14 max-w-screen-2xl items-center ">
                 <div>
-                    <Select value={params.get('sort') || 'hot'}
+                    {/* <Select value={params.get('sort') || 'hot'}
                         onValueChange={(v) => {
                             router.push(`${pathname}?sort=${v}`)
                         }}>
@@ -61,7 +61,7 @@ export function SiteHeaderContent() {
                                 })
                             }
                         </SelectContent>
-                    </Select>
+                    </Select> */}
                 </div>
                 <div className="flex flex-1 items-center  space-x-2 justify-end">
                     <nav className="flex items-center">

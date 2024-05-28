@@ -3,6 +3,7 @@ import Link from 'next/link';
 import dayjs from 'dayjs';
 import { Badge } from '@/components/ui/badge';
 import { Menubar, MenubarMenu, MenubarTrigger } from '@/components/ui/menubar';
+import data from './全部.json'
 import {
   Card,
   CardDescription,
@@ -11,117 +12,111 @@ import {
 } from "@/components/ui/card"
 import { DatePicker } from '@/components/DayPicker';
 import { numberWithUnit } from '@/lib/utils';
+import { DataTable } from '@/components/DataTable';
+import { ColumnDef } from '@tanstack/react-table';
+import { AppInfo } from '@/components/type';
+import { columns } from '@/components/columns';
 interface HotsProps {
   params: { date: string };
-  searchParams: { sort: string };
+  searchParams: {
+    categoryId: number;
+  }
 }
+
+const ClassIds = [
+  { name: "全部", id: 0 },
+  { name: "综合资讯", id: 1 },
+  { name: "电子商务", id: 2 },
+  { name: "社交网络", id: 3 },
+  { name: "实用工具", id: 4 },
+  { name: "金融理财", id: 5 },
+  { name: "学习教育", id: 6 },
+  { name: "美食外卖", id: 7 },
+  { name: "生活服务", id: 8 },
+  { name: "通讯聊天", id: 9 },
+  { name: "游戏服务", id: 10 },
+  { name: "下载分发", id: 11 },
+  { name: "女性亲子", id: 12 },
+  { name: "视频服务", id: 13 },
+  { name: "健康医疗", id: 14 },
+  { name: "汽车服务", id: 15 },
+  { name: "电子阅读", id: 16 },
+  { name: "办公管理", id: 17 },
+  { name: "搜索服务", id: 18 },
+  { name: "智能穿戴", id: 19 },
+  { name: "音乐音频", id: 20 },
+  { name: "拍摄美化", id: 21 },
+  { name: "旅游出行", id: 22 },
+  { name: "房产服务", id: 23 },
+];
 
 export async function generateMetadata(
   { params }: HotsProps,
 ): Promise<Metadata> {
   const date = params.date;
   return {
-    title: `微博热搜榜  ${date}`,
-    description: `微博热搜榜  ${date}`,
+    title: `APP日活  ${date}`,
+    description: `APP日活  ${date}`,
   };
 }
 
-interface SavedWeibo {
-  title: string;
-  category: string;
-  description: string;
-  url: string;
-  hot: number;
-  ads: boolean;
-  readCount?: number;
-  discussCount?: number;
-  origin?: number;
-}
-async function getData(date: string): Promise<SavedWeibo[]> {
-  const res = await fetch(
-    // `https://cdn.jsdelivr.net/gh/lxw15337674/weibo-trending-hot-history@master/api/${date}/summary.json`,
-    `https://raw.githubusercontent.com/lxw15337674/weibo-trending-hot-history/master/api/${date}/summary.json`,
-    {
-      next: { revalidate: 3600 }
-    }
-  );
 
-  if (!res.ok) {
-    return [];
-  }
-  return res.json()
+async function getData(date: string, categoryId: number): Promise<AppInfo[]> {
+  // const category = ClassIds.find((item) => item.id === categoryId)?.name || "全部";
+  // debugger
+  // const res = await fetch(
+  //   // `https://cdn.jsdelivr.net/gh/lxw15337674/weibo-trending-hot-history@master/api/${date}/summary.json`,
+  //   `https://raw.githubusercontent.com/lxw15337674/app-trending-history/master/api/${date}/${category}.json`,
+  //   {
+  //     next: { revalidate: 3600 }
+  //   }
+  // );
+
+  // if (!res.ok) {
+  //   return [];
+  // }
+  // return res.json()
+
+  return data
 }
 
-export default async function Hots({ params: { date }, searchParams: { sort = 'hot' } }: HotsProps) {
-  const data = await getData(date || dayjs().format('YYYY-MM-DD'));
+export default async function Hots({ params: { date }, searchParams: { categoryId } }: HotsProps) {
+  const data = await getData(date || dayjs().format('YYYY-MM'), categoryId);
+
   return (
     <main className="p-5 lg:p-0 lg:pt-5">
       <div className="mx-auto max-w-[980px]">
         <Menubar className="flex justify-between">
           <MenubarMenu>
             <Link
-              href={`/hots/${dayjs(date)
-                .subtract(1, 'day')
-                .format('YYYY-MM-DD')}?sort=${sort}`}
+              href={`/hots/${dayjs(date).add(1, 'month').format('YYYY-MM')}`}
             >
               <MenubarTrigger
                 className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >前一天</MenubarTrigger>
+              >
+                上一个月
+              </MenubarTrigger>
             </Link>
           </MenubarMenu>
           <MenubarMenu>
-            <DatePicker value={date} sort={sort} />
+            {/* <DatePicker value={date} categoryId={categoryId} /> */}
           </MenubarMenu>
           <MenubarMenu >
             <Link
-              href={`/hots/${dayjs(date).add(1, 'day').format('YYYY-MM-DD')}?sort=${sort}`}
+              href={`/hots/${dayjs(date).add(1, 'month').format('YYYY-MM')}`}
             >
               <MenubarTrigger
                 className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={dayjs(date).isAfter(dayjs().subtract(1, 'day'))}
               >
-                后一天
+                后一个月
               </MenubarTrigger>
             </Link>
           </MenubarMenu>
         </Menubar>
       </div>
-
       <div className="mx-auto flex max-w-[980px] flex-col gap-2 py-4">
-        {data.sort((a, b) => (Number(b[sort as keyof SavedWeibo]) ?? 0) - (Number(a[sort as keyof SavedWeibo]) ?? 0)).map((item: SavedWeibo) => {
-          const url = `https://s.weibo.com/weibo?q=%23${item.title}%23`;
-          return (
-            <a
-              href={url}
-              key={item.title}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Card className="cursor-pointer hover:bg-muted/50">
-                <CardHeader>
-                  <CardTitle>
-                    <div className="flex gap-2">
-                      <h5 className="text-xl ">
-                        {item.title}
-                      </h5>
-                      <div className="flex gap-2 items-center flex-shrink-0 flex-wrap max-w-[60%]">
-                        {item.category && <Badge>{item.category.trim()}</Badge>}
-                        {item.ads && <Badge variant="destructive">推广</Badge>}
-                        <Badge variant="outline">🔥 {numberWithUnit(item?.hot ?? 0)}</Badge>
-                        {item.readCount && <Badge variant="outline">阅读 {numberWithUnit(item.readCount)}</Badge>}
-                        {item.discussCount && <Badge variant="outline">讨论 {numberWithUnit(item.discussCount)}</Badge>}
-                        {item.origin && <Badge variant="outline">原创 {numberWithUnit(item.origin)}</Badge>}
-                      </div>
-                    </div>
-                  </CardTitle>
-                  <CardDescription>
-                    {item.description || "没有描述"}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </a>
-          );
-        })}
+        <DataTable data={data} columns={columns} />
       </div>
     </main>
   );

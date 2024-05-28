@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation"
 
 interface DatePickerProps {
     value: string
-    sort: string
+    categoryId:  number
 }
 export function DatePicker(props: DatePickerProps) {
     const date = new Date(props.value)
@@ -32,7 +32,7 @@ export function DatePicker(props: DatePickerProps) {
                     )}
                 >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "yyyy-MM-dd") : "选择日期"}
+                    {date ? format(date, "YYYY-MM") : "选择日期"}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="center">
@@ -42,7 +42,7 @@ export function DatePicker(props: DatePickerProps) {
                     onSelect={(date) => {
                         if (date) {
                             // 跳转到新的 URL
-                            router.push(`/hots/${format(date, 'yyyy-MM-dd')}?sort=${props.sort}`)
+                            router.push(`/hots/${format(date, 'YYYY-MM')}?categoryId=${props.categoryId}`)
                         }
                     }}
                     initialFocus
