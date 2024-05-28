@@ -45,12 +45,14 @@ async function saveMonthJson(words: AppInfo[], category: string, timeId: number)
 // 获取之前每个月的数据,直到数据为空
 const getAllMonthData = async () => {
   let timeId = getPreMonthTimeId(dayjs());
-  while (timeId >= 202001) {
+  while (timeId >= 202101) {
     for (let cls of ClassIds) {
       // 只能获取前一个月数据
       const data = await fetchData(cls.id, timeId)
-      if (data) {
+      if (data.length > 0) {
         await saveMonthJson(data, cls.name, timeId);
+      } else {
+        return
       }
       // 停1s
       await sleep(1000);
@@ -66,7 +68,7 @@ async function bootstrap() {
         const timeId = getPreMonthTimeId(dayjs());
         // 只能获取前一个月数据
         const data = await fetchData(cls.id, timeId)
-        if (data) {
+        if (data.length > 0) {
           await saveMonthJson(data, cls.name, timeId);
         }
         // 停1s

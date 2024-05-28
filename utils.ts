@@ -79,14 +79,14 @@ export const getTimeName = (timeId: number) => {
     return `${timeStr.slice(0, 4)}-${timeStr.slice(4, 6)}`;
 }
 
-export const fetchData = async (classId: number, timeId: number) => {
+export const fetchData = async (classId: number, timeId: number): Promise<AppInfo[]> => {
     const params = {
         classId: classId,
         classLevel: classId === 0 ? 0 : 1,
         timeId: timeId,
         orderBy: 2,
         pageIndex: 1,
-        pageSize: 100
+        pageSize: classId === 0 ? 100 : 30
     };
     return await axios.get<AppData>('https://index.iresearch.com.cn/app/GetDataList1', {
         params: params
@@ -95,12 +95,13 @@ export const fetchData = async (classId: number, timeId: number) => {
             if (res.data.Status === 'success') {
                 return res.data.List;
             } else {
-                throw new Error('Request failed');
+                return []
             }
         })
         .catch(error => {
             // 处理错误
             console.error('Axios error:', error);
+            return []; // Add this line to return an empty array when an error occurs
         });
 }
 
